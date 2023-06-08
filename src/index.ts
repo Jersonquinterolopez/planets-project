@@ -2,7 +2,6 @@ import { parse } from "csv-parse";
 import fs from "fs";
 
 const results: Array<string | Buffer> = [];
-const habitablePlanets: Array<string | Buffer> = [];
 
 // This a real example of the emitter and the event-driven development
 // in Node, as we see we are using events that are subscribed to the
@@ -12,7 +11,10 @@ interface Planet {
     koi_disposition: string;
     koi_insol: number;
     koi_prad: number;
+    kepler_name: string;
 }
+
+const habitablePlanets: Array<Planet> = [];
 
 function isHabitablePlanet(planet: Planet): boolean {
     const planetIsConfirmed = planet["koi_disposition"] === "CONFIRMED";
@@ -25,8 +27,7 @@ function isHabitablePlanet(planet: Planet): boolean {
 
 // createReadStream returns a stream of bytes
 fs.createReadStream("kepler_data.csv")
-    // the pipe method allow us to create a pipe to parse the data before
-    // it arrives to the event 'data'
+    // with pipe we can pass the stream to another function before that the stream is consumed by the event 'data'
     .pipe(
         // we can pass optios to the parse method
         parse({
@@ -45,5 +46,5 @@ fs.createReadStream("kepler_data.csv")
     })
     .on("end", () => {
         console.log(`🌍 ${habitablePlanets.length} habitable planets found!`);
-        console.log(`🥑 ${JSON.stringify(habitablePlanets)}`);
+        console.log(habitablePlanets.map((planet) => planet["kepler_name"]));
     });
